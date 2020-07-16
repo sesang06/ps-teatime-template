@@ -4,44 +4,80 @@ from bs4 import BeautifulSoup
 from datetime import date
 
 
-def get_date():
+class Problem:
+
+    def __init__(self, index):
+        self.index = index
+        self.url = self.__get_url(index)
+        self.title = self.__get_title(index)
+
+    def __get_url(self, index):
+        return f'https://www.acmicpc.net/problem/{index}'
+
+    def __get_title(self, index):
+        urllib3.disable_warnings()
+        url = self.__get_url(index)
+        http = urllib3.PoolManager()
+        r = http.request('GET', url)
+        soup = BeautifulSoup(r.data, 'html.parser')
+        return soup.title.string.split("번: ")[1]
+
+    def __str__(self):
+        return f'{self.index} {self.url} {self.title}'
+
+
+def get_date() -> str:
     today = date.today()
     return f'{today.year}년 {today.month}월 {today.day}일'
 
-def get_url(index):
-    return f'https://www.acmicpc.net/problem/{index}'
-def get_title(index):
-    urllib3.disable_warnings()
-    url = get_url(index)
-    http = urllib3.PoolManager()
-    r = http.request('GET', url)
-    soup = BeautifulSoup(r.data, 'html.parser')
-    return soup.title.string.split("번: ")[1]
 
-
-def get_templete(low, high):
+def get_templete(low: Problem, high: Problem) -> str:
     msg = get_date()
     msg += '\n'
     msg += '- 낮에는 (2시 ~8시) 풀고 인증합니다.\n'
     msg += '- 어려운 문제가 나왔을 때는, 4시부터 서로 힌트를 주고받습니다.\n'
     msg += '- 밤 8시 부터 푼 문제의 코드를 공개합니다.\n'
     msg += '중하급 \n'
-    msg += get_title(low)
+    msg += low.title
     msg += '\n'
-    msg += get_url(low)
+    msg += low.url
     msg += '\n'
     msg += '중상급 \n'
-    msg += get_title(high)
+    msg += high.title
     msg += '\n'
-    msg += get_url(high)
+    msg += high.url
     return msg
 
+
+def get_notion_templete(low: Problem, high: Problem) -> str:
+    msg = "### "
+    msg += get_date()
+    msg += '\n\n'
+    msg += '- 중하급\n'
+    msg += '    - '
+    msg += low.title
+    msg += '\n        - '
+    low_url = low.url
+    msg += low_url
+    msg += '\n'
+    msg += '- 중상급\n'
+    msg += '    - '
+    msg += high.title
+    msg += '\n        - '
+    high_url = high.url
+    msg += high_url
+    msg += '\n'
+    return msg
+
+
 if __name__ == '__main__':
-    low = sys.argv[1]
-    high = sys.argv[2]
+    low = Problem(sys.argv[1])
+    high = Problem(sys.argv[2])
 
     templete = get_templete(low, high)
-    print(templete)
+    notion_templete = get_notion_templete(low, high)
+    # print(templete)
+    print(notion_templete)
     f = open(f'{get_date()}.txt', 'w')
     f.write(templete)
     f.close()
