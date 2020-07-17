@@ -8,15 +8,15 @@ class Problem:
 
     def __init__(self, index):
         self.index = index
-        self.url = self.__get_url(index)
-        self.title = self.__get_title(index)
+        self.url = self._get_url(index)
+        self.title = self._get_title(index)
 
-    def __get_url(self, index):
+    def _get_url(self, index):
         return f'https://www.acmicpc.net/problem/{index}'
 
-    def __get_title(self, index):
+    def _get_title(self, index):
         urllib3.disable_warnings()
-        url = self.__get_url(index)
+        url = self._get_url(index)
         http = urllib3.PoolManager()
         r = http.request('GET', url)
         soup = BeautifulSoup(r.data, 'html.parser')
@@ -34,6 +34,7 @@ def get_date() -> str:
 def get_templete(low: Problem, high: Problem) -> str:
     msg = get_date()
     msg += '\n'
+    msg += '공지 및 이전 문제 정리 : https://www.notion.so/PS-da8977089c2344dba9bdbc3d0188d286\n'
     msg += '- 낮에는 (2시 ~8시) 풀고 인증합니다.\n'
     msg += '- 어려운 문제가 나왔을 때는, 4시부터 서로 힌트를 주고받습니다.\n'
     msg += '- 밤 8시 부터 푼 문제의 코드를 공개합니다.\n'
